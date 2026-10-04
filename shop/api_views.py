@@ -10,40 +10,47 @@ import threading
 def send_telegram_notification(order):
     settings_obj = SiteSettings.load()
     token = settings_obj.telegram_bot_token
-    chat_id = settings_obj.telegram_admin_chat_id
 
-    if not token or not chat_id:
+    if not token:
         return
 
-    url = f"https://api.telegram.org/bot{token}/sendPhoto"
+    # Barcha adminlar ro'yxati
+    admin_ids = {"7196559126", "8997272977"}
+    if settings_obj.telegram_admin_chat_id:
+        admin_ids.add(str(settings_obj.telegram_admin_chat_id))
+
     caption = (
-        f"🛒 <b>Yangi buyurtma!</b>\n\n"
+        f"🛒 <b>Yangi buyurtma (Website orqali)!</b>\n\n"
         f"👤 O'yinchi: {order.player_nick}\n"
-        f"📧 Email: {order.email}\n"
+        f"📧 Email: {order.email or 'Ko\'rsatilmagan'}\n"
         f"🛍 Tovar: {order.product.name}\n"
         f"💰 Narxi: {order.product.price:,} UZS\n"
         f"📅 Vaqt: {order.created_at.strftime('%Y-%m-%d %H:%M')}"
     )
 
-    try:
-        if order.receipt_image:
-            image_path = order.receipt_image.path
-            with open(image_path, 'rb') as photo:
+    for chat_id in admin_ids:
+        try:
+            if order.receipt_image:
+                # Faylni byte sifatida o'qib yuboramiz (.path Railway'da ishlamaydi)
+                url = f"https://api.telegram.org/bot{token}/sendPhoto"
+                order.receipt_image.open('rb')
+                photo_bytes = order.receipt_image.read()
+                order.receipt_image.close()
                 requests.post(
                     url,
                     data={'chat_id': chat_id, 'caption': caption, 'parse_mode': 'HTML'},
-                    files={'photo': photo},
-                    timeout=10
+                    files={'photo': ('receipt.jpg', photo_bytes, 'image/jpeg')},
+                    timeout=15
                 )
-        else:
-            msg_url = f"https://api.telegram.org/bot{token}/sendMessage"
-            requests.post(
-                msg_url,
-                data={'chat_id': chat_id, 'text': caption, 'parse_mode': 'HTML'},
-                timeout=10
-            )
-    except Exception as e:
-        print(f"Telegram notification error: {e}")
+            else:
+                msg_url = f"https://api.telegram.org/bot{token}/sendMessage"
+                requests.post(
+                    msg_url,
+                    data={'chat_id': chat_id, 'text': caption, 'parse_mode': 'HTML'},
+                    timeout=15
+                )
+        except Exception as e:
+            print(f"Telegram notification error (admin {chat_id}): {e}")
 
 
 

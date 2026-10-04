@@ -11,19 +11,34 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-^g=k8299b=t&1*u^3vv!x
 DEBUG = True
 
 # Permitted domains
-ALLOWED_HOSTS = [
-    'novamc-uz.onrender.com',
-    'novamc-production.up.railway.app',
-    'localhost',
-    '127.0.0.1',
-    '*',
-]
+ALLOWED_HOSTS = ['*']
 
 # CSRF uchun ishonchli manbalar (https:// bilan yozilishi shart)
 CSRF_TRUSTED_ORIGINS = [
     'https://novamc-uz.onrender.com',
     'https://novamc-production.up.railway.app',
+    'https://*.up.railway.app',
+    'https://*.railway.app',
+    'https://*.onrender.com',
 ]
+
+# Dynamic Railway / Render domain support
+for env_key in ['RAILWAY_PUBLIC_DOMAIN', 'RAILWAY_STATIC_URL', 'RENDER_EXTERNAL_HOSTNAME']:
+    domain = os.environ.get(env_key)
+    if domain:
+        domain = domain.replace('http://', '').replace('https://', '').strip('/')
+        if domain:
+            origin = f'https://{domain}'
+            if origin not in CSRF_TRUSTED_ORIGINS:
+                CSRF_TRUSTED_ORIGINS.append(origin)
+
+# Custom extra origins from env if needed
+extra_origins = os.environ.get('CSRF_TRUSTED_ORIGINS_EXTRA')
+if extra_origins:
+    for item in extra_origins.split(','):
+        item = item.strip()
+        if item and item not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(item)
 
 # Proxy orqasida HTTPS'ni to'g'ri aniqlash uchun (Render/Railway)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -2,6 +2,9 @@
 # Apply database migrations
 python manage.py migrate
 
+# Create or update superuser
+python create_superuser.py
+
 # Collect static files
 python manage.py collectstatic --noinput
 

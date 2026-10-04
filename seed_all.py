@@ -6,6 +6,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "novamc.settings")
 django.setup()
 
@@ -15,174 +18,28 @@ from shop.models import ServerMode, Category, Product
 # SERVERLAR
 # ===========================================================================
 
-anarxiya2, _ = ServerMode.objects.get_or_create(
-    slug='anarxiya2',
-    defaults={'name': 'Anarxiya2', 'order': 1, 'is_active': True}
-)
-anarxiya2.name = 'Anarxiya2'; anarxiya2.order = 1; anarxiya2.save()
-
 anarxiya1, _ = ServerMode.objects.get_or_create(
     slug='anarxiya1',
-    defaults={'name': 'Anarxiya1', 'order': 2, 'is_active': True}
+    defaults={'name': 'Anarxiya1', 'order': 1, 'is_active': True}
 )
-anarxiya1.name = 'Anarxiya1'; anarxiya1.order = 2; anarxiya1.save()
+anarxiya1.name = 'Anarxiya1'; anarxiya1.order = 1; anarxiya1.save()
 
-boxpvp, _ = ServerMode.objects.get_or_create(
-    slug='boxpvp',
-    defaults={'name': 'BoxPvP', 'order': 3, 'is_active': True}
+smp, _ = ServerMode.objects.get_or_create(
+    slug='smp',
+    defaults={'name': 'SMP', 'order': 2, 'is_active': True}
 )
-boxpvp.name = 'BoxPvP'; boxpvp.order = 3; boxpvp.save()
+smp.name = 'SMP'; smp.order = 2; smp.save()
 
-print("Serverlar tayyor.")
+duels, _ = ServerMode.objects.get_or_create(
+    slug='duels',
+    defaults={'name': 'Duels', 'order': 3, 'is_active': True}
+)
+duels.name = 'Duels'; duels.order = 3; duels.save()
+
+print("Serverlar tayyor: Anarxiya1, SMP, Duels.")
 
 # ===========================================================================
-# ANARXIYA2 — ASOSIY RANKLAR
-# ===========================================================================
-a2_asosiy, _ = Category.objects.get_or_create(
-    slug='anarxiya2-asosiy-ranklar',
-    defaults={'name': 'Asosiy Ranklar', 'server': anarxiya2, 'order': 1}
-)
-a2_asosiy.server = anarxiya2; a2_asosiy.order = 1; a2_asosiy.save()
-
-a2_ranks = [
-    {
-        'slug': 'a2-askar',
-        'name': 'Askar',
-        'price': 6000,
-        'commands': '/kit askar\n/hat\n/top',
-        'features': (
-            'Homelar soni: 4\n'
-            'RG bloklar: 4\n'
-            'Auksion slotlari: 8\n'
-            'Enderchest 4 qator\n'
-            'Teleport soniyasi: 6 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-qahramon',
-        'name': 'Qahramon',
-        'price': 10500,
-        'commands': '/kit qahramon\n/clear\n/feed\n/heal\n/me',
-        'features': (
-            'Homelar soni: 5\n'
-            'RG bloklar: 4\n'
-            'Auksion slotlari: 9\n'
-            'Enderchest 4 qator\n'
-            'Teleport soniyasi: 6 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-ritsar',
-        'name': 'Ritsar',
-        'price': 16000,
-        'commands': '/kit ritsar\n/back\n/ec\n/wbench\n/itemname',
-        'features': (
-            "O'limda XP ni saqlab qolish\n"
-            'Rangli yoza olish\n'
-            'Homelar soni: 6\n'
-            'RG bloklar: 6\n'
-            'Auksion slotlari: 10\n'
-            'Enderchest 4 qator\n'
-            'Teleport soniyasi: 5 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-alpomish',
-        'name': 'Alpomish',
-        'price': 22000,
-        'commands': '/kit alpomish\n/bc\n/ext\n/msgtoggle\n/paytoggle\n/tptoggle\n/feed [oyinchi]\n/heal [oyinchi]',
-        'features': (
-            'Homelar soni: 8\n'
-            'RG bloklar: 7\n'
-            'Auksion slotlari: 11\n'
-            'Enderchest 5 qator\n'
-            'Teleport soniyasi: 4 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-titan',
-        'name': 'Titan',
-        'price': 29000,
-        'commands': '/kit titan\n/time\n/weather\n/loom\n/carttable\n/eztooka\n/firework',
-        'features': (
-            'Homelar soni: 10\n'
-            'RG bloklar: 7\n'
-            'Auksion slotlari: 12\n'
-            'Enderchest 5 qator\n'
-            'Teleport soniyasi: 4 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-elita',
-        'name': 'Elita',
-        'price': 37000,
-        'commands': '/kit elita\n/jump\n/afk\n/setwarp\n/delwarp\n/repair',
-        'features': (
-            "AFK da kick qilinmaydi\n"
-            'Homelar soni: 12\n'
-            'RG bloklar: 8\n'
-            'Auksion slotlari: 12\n'
-            'Enderchest 5 qator\n'
-            'Teleport soniyasi: 3 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-afsona',
-        'name': 'Afsona',
-        'price': 48000,
-        'commands': '/kit afsona\n/smithtable\n/stonecutter\n/grindstone',
-        'features': (
-            'Homelar soni: 15\n'
-            'RG bloklar: 10\n'
-            'Auksion slotlari: 14\n'
-            'Enderchest 5 qator\n'
-            'Teleport soniyasi: 3 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-general',
-        'name': 'General',
-        'price': 68000,
-        'commands': '/kit general',
-        'features': (
-            "Teleportga cheklov yo'q\n"
-            'Homelar soni: 18\n'
-            'RG bloklar: 15\n'
-            'Auksion slotlari: 13\n'
-            'Enderchest 6 qator\n'
-            'Teleport soniyasi: 0 soniya'
-        ),
-    },
-    {
-        'slug': 'a2-imperator',
-        'name': 'Imperator',
-        'price': 86000,
-        'commands': '/kit imperator\n/fly',
-        'features': (
-            "Teleportga cheklov yo'q\n"
-            'Homelar soni: 20\n'
-            'RG bloklar: 15\n'
-            'Auksion slotlari: 16\n'
-            'Enderchest 6 qator\n'
-            'Teleport soniyasi: 0 soniya'
-        ),
-    },
-]
-
-print("\n--- Anarxiya2 Asosiy Ranklar ---")
-for r in a2_ranks:
-    obj, created = Product.objects.update_or_create(
-        slug=r['slug'],
-        defaults={
-            'name': r['name'], 'category': a2_asosiy,
-            'price': r['price'], 'commands': r['commands'],
-            'features': r['features'], 'is_active': True,
-        }
-    )
-    print(f"  {'[+]' if created else '[~]'} {obj.name} — {obj.price:,} UZS")
-
-# ===========================================================================
-# ANARXIYA1 — DONATOR RANKLAR
+# ANARXIYA 1 — DONATOR RANKLAR
 # ===========================================================================
 a1_donator, _ = Category.objects.get_or_create(
     slug='anarxiya1-donator-ranklar',
@@ -192,134 +49,101 @@ a1_donator.server = anarxiya1; a1_donator.order = 1; a1_donator.save()
 
 a1_ranks = [
     {
-        'slug': 'anarxiya1-starlight',
-        'name': 'STARLIGHT',
-        'price': 10000,
-        'commands': '/kit starlight\n/workbench\n/titul\n/feed\n/clearinv\n/back\n/hat',
+        'slug': 'anarxiya1-rabbit',
+        'name': 'RABBIT',
+        'price': 29000,
+        'commands': '/kit',
         'features': (
-            "STARLIGHT to'plami – /kit starlight\n"
-            "Virtual dastgoh – /workbench\n"
-            "Unikal titullar – /titul\n"
-            "Ochlikni to'ldirish – /feed\n"
-            "Inventarni tozalash – /clearinv\n"
-            "O'lim joyiga qaytish – /back\n"
-            "Boshga blok kiyish – /hat\n"
-            "Maosh: 750\n"
-            "Uylar soni: 5\n"
-            "Regionlar soni: 4\n"
-            "Auksiondagi slotlar soni: 12\n"
-            "Xaridor ko'paytiruvchisi: x1.1"
+            'PLUS, PLUSPRO va maxsus RABBIT to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x3.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-lunar',
-        'name': 'LUNAR',
-        'price': 20000,
-        'commands': '/kit lunar\n/titul\n/uc menu\n/fix\n/loom\n/near',
+        'slug': 'anarxiya1-tiger',
+        'name': 'TIGER',
+        'price': 69000,
+        'commands': '/kit',
         'features': (
-            "LUNAR to'plami – /kit lunar\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "Buyumni ta'mirlash – /fix\n"
-            "To'quv stanogini ochish – /loom\n"
-            "Yaqindagi o'yinchilarni bilish – /near\n"
-            "Maosh: 1000\n"
-            "Uylar soni: 10\n"
-            "Regionlar soni: 5\n"
-            "Auksiondagi slotlar soni: 16\n"
-            "Xaridor ko'paytiruvchisi: x1.1"
+            'PLUS, PLUSPRO va maxsus TIGER to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x5.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-eclipse',
-        'name': 'ECLIPSE',
-        'price': 35000,
-        'commands': '/kit eclipse\n/titul\n/uc menu\n/ptime set\n/ptime reset\n/ec\n/setwarp\n/afk\n/me',
+        'slug': 'anarxiya1-hydra',
+        'name': 'HYDRA',
+        'price': 119000,
+        'commands': '/kit',
         'features': (
-            "ECLIPSE to'plami – /kit eclipse\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "Shaxsiy vaqtni o'zgartirish – /ptime\n"
-            "Ender-sandiqni ochish – /ec\n"
-            "Varp o'rnatish – /setwarp\n"
-            "AFK – /afk\n"
-            "Maosh: 1500\n"
-            "Uylar soni: 15\n"
-            "Regionlar soni: 6\n"
-            "Auksiondagi slotlar soni: 20\n"
-            "Xaridor ko'paytiruvchisi: x1.2"
+            'PLUS, PLUSPRO va maxsus HYDRA to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x4.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-astral',
-        'name': 'ASTRAL',
-        'price': 50000,
-        'commands': '/kit astral\n/titul\n/uc menu\n/invsee\n/heal',
+        'slug': 'anarxiya1-d-helper',
+        'name': 'D.HELPER',
+        'price': 139000,
+        'commands': '/kit',
         'features': (
-            "ASTRAL to'plami – /kit astral\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "O'yinchining inventarini ko'rish – /invsee\n"
-            "Sog'likni to'ldirish – /heal\n"
-            "Maosh: 2000\n"
-            "Uylar soni: 20\n"
-            "Regionlar soni: 7\n"
-            "Auksiondagi slotlar soni: 24\n"
-            "Xaridor ko'paytiruvchisi: x1.2"
+            'PLUS, PLUSPRO va maxsus D.HELPER to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x5.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-celestial',
-        'name': 'CELESTIAL',
-        'price': 75000,
-        'commands': '/kit celestial\n/titul\n/uc menu\n/changenick\n/time day\n/time night\n/hat',
+        'slug': 'anarxiya1-god',
+        'name': 'GOD',
+        'price': 259000,
+        'commands': '/kit',
         'features': (
-            "CELESTIAL to'plami – /kit celestial\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "O'yindagi nikni o'zgartirish – /changenick\n"
-            "Serverdagi vaqtni o'zgartirish – /time day/night\n"
-            "Boshga blok kiyish – /hat\n"
-            "Maosh: 3000\n"
-            "Uylar soni: 35\n"
-            "Regionlar soni: 9\n"
-            "Auksiondagi slotlar soni: 30\n"
-            "Xaridor ko'paytiruvchisi: x1.5"
+            'PLUS, PLUSPRO va maxsus GOD to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x5.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-moonlord',
-        'name': 'MOONLORD',
-        'price': 100000,
-        'commands': '/kit moonlord\n/titul\n/uc menu\n/fixall\n/fly\n/itemlore add\n/item name',
+        'slug': 'anarxiya1-pegas',
+        'name': 'PEGAS',
+        'price': 329000,
+        'commands': '/kit',
         'features': (
-            "MOONLORD to'plami – /kit moonlord\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "Barcha buyumlarni ta'mirlash – /fixall\n"
-            "Parvoz rejimini yoqish – /fly\n"
-            "Buyumga tavsif qo'shish – /itemlore add\n"
-            "Maosh: 4000\n"
-            "Uylar soni: 50\n"
-            "Regionlar soni: 10\n"
-            "Auksiondagi slotlar soni: 32\n"
-            "Xaridor ko'paytiruvchisi: x1.75"
+            'PLUS, PLUSPRO va maxsus PEGAS to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x5.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
     {
-        'slug': 'anarxiya1-lunacy',
-        'name': 'LUNACY',
-        'price': 150000,
-        'commands': '/kit lunacy\n/titul\n/uc menu',
+        'slug': 'anarxiya1-purple-cash',
+        'name': 'PURPLE / CASH',
+        'price': 399000,
+        'commands': '/kit',
         'features': (
-            "LUNACY to'plami – /kit lunacy\n"
-            "Unikal titullar – /titul\n"
-            "Unikal effektlar – /uc menu\n"
-            "Maosh: 5000\n"
-            "Uylar soni: 100\n"
-            "Regionlar soni: 11\n"
-            "Auksiondagi slotlar soni: 60\n"
-            "Xaridor ko'paytiruvchisi: x2.0"
+            'PLUS, PLUSPRO va maxsus CASH to‘plamlari\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Moblar va o‘ldirishlardan valyuta ko‘paytirgichi: x5.0\n'
+            'Privatlar soni: 999+\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
 ]
@@ -337,104 +161,129 @@ for r in a1_ranks:
     print(f"  {'[+]' if created else '[~]'} {obj.name} — {obj.price:,} UZS")
 
 # ===========================================================================
-# BOXPVP — DONATOR RANKLAR
+# SMP — DONATOR RANKLAR
 # ===========================================================================
-bp_donator, _ = Category.objects.get_or_create(
-    slug='boxpvp-donator-ranklar',
-    defaults={'name': 'Donator Ranklar', 'server': boxpvp, 'order': 1}
+smp_donator, _ = Category.objects.get_or_create(
+    slug='smp-donator-ranklar',
+    defaults={'name': 'Donator Ranklar', 'server': smp, 'order': 1}
 )
-bp_donator.server = boxpvp; bp_donator.order = 1; bp_donator.save()
+smp_donator.server = smp; smp_donator.order = 1; smp_donator.save()
 
-bp_ranks = [
+smp_ranks = [
     {
-        'slug': 'boxpvp-vip',
-        'name': 'VIP',
-        'price': 19000,
-        'commands': '/rank give {player} VIP',
+        'slug': 'smp-prime',
+        'name': 'PRIME',
+        'price': 49000,
+        'commands': '/kit prime',
         'features': (
-            '2x XP Multiplier\n'
-            '+1 AFK Shard every 15m\n'
-            'VIP Kit Access\n'
-            'VIP Mine Access\n'
-            '2x Enderchest Rows\n'
-            '/ptime Command'
-        ),
-    },
-    {
-        'slug': 'boxpvp-pro',
-        'name': 'PRO',
-        'price': 37000,
-        'commands': '/rank give {player} PRO',
-        'features': (
-            '2x XP Multiplier\n'
-            '+1 AFK Shard every 15m\n'
-            '2x Concurrent Active Quests\n'
-            'Pro Kit Access (+ Kits from earlier ranks)\n'
-            'Pro Mine Access (+ Mines from earlier ranks)\n'
-            '3x Enderchest Rows\n'
-            '/ptime Command\n'
-            '/craft Command\n'
-            '/spectate Command\n'
-            '/hat Command'
-        ),
-    },
-    {
-        'slug': 'boxpvp-mvp',
-        'name': 'MVP',
-        'price': 54000,
-        'commands': '/rank give {player} MVP',
-        'features': (
-            '2x XP Multiplier\n'
-            '+1 AFK Shard every 15m\n'
-            '2x Concurrent Active Quests\n'
-            'MVP Kit Access (+ Kits from earlier ranks)\n'
-            'MVP Mine Access (+ Mines from earlier ranks)\n'
-            '4x Enderchest Rows\n'
-            '/ptime, /craft, /spectate, /hat Command\n'
-            '/enderchest Command'
-        ),
-    },
-    {
-        'slug': 'boxpvp-elite',
-        'name': 'ELITE',
-        'price': 65000,
-        'commands': '/rank give {player} ELITE',
-        'features': (
-            '2x XP Multiplier\n'
-            '+1 AFK Shard every 15m\n'
-            '3x Concurrent Active Quests\n'
-            'Elite Kit Access (+ Kits from earlier ranks)\n'
-            'Elite Mine Access (+ Mines from earlier ranks)\n'
-            '5x Enderchest Rows\n'
-            '/ptime, /craft, /spectate, /hat Command\n'
-            '/enderchest, /disposal, /invsee Command'
-        ),
-    },
-    {
-        'slug': 'boxpvp-immortal',
-        'name': 'IMMORTAL',
-        'price': 87000,
-        'commands': '/rank give {player} IMMORTAL',
-        'features': (
-            '2x XP Multiplier\n'
-            '+1 AFK Shard every 15m\n'
-            '3x Concurrent Active Quests\n'
-            'Immortal Kit Access (+ Kits from earlier ranks)\n'
-            'Immortal Mine Access (+ Mines from earlier ranks)\n'
-            '6x Enderchest Rows\n'
-            '/ptime, /craft, /spectate, /hat Command\n'
-            '/enderchest, /disposal, /invsee Command\n'
-            '/heal Command (10m Cooldown)'
+            'PRIME to‘plami – /kit prime\n'
+            '/sethome — 999+ ta uy joylash joyi\n'
+            'Auksiondagi joy: 999\n'
+            'Server to‘la bo‘lsa ham kirish imkoniyati'
         ),
     },
 ]
 
-print("\n--- BoxPvP Donator Ranklar ---")
-for r in bp_ranks:
+print("\n--- SMP Donator Ranklar ---")
+for r in smp_ranks:
     obj, created = Product.objects.update_or_create(
         slug=r['slug'],
         defaults={
-            'name': r['name'], 'category': bp_donator,
+            'name': r['name'], 'category': smp_donator,
+            'price': r['price'], 'commands': r['commands'],
+            'features': r['features'], 'is_active': True,
+        }
+    )
+    print(f"  {'[+]' if created else '[~]'} {obj.name} — {obj.price:,} UZS")
+
+# ===========================================================================
+# DUELS — DONATOR RANKLAR
+# ===========================================================================
+duels_donator, _ = Category.objects.get_or_create(
+    slug='duels-donator-ranklar',
+    defaults={'name': 'Donator Ranklar', 'server': duels, 'order': 1}
+)
+duels_donator.server = duels; duels_donator.order = 1; duels_donator.save()
+
+duels_ranks = [
+    {
+        'slug': 'duels-king',
+        'name': '👑 King',
+        'price': 19000,
+        'commands': '/store king',
+        'features': (
+            'Quick Join\'ga ruxsat\n'
+            'Jamoa nomini ko‘rsatish\n'
+            'Emote buyruqlariga ruxsat'
+        ),
+    },
+    {
+        'slug': 'duels-lion',
+        'name': '🦁 Lion',
+        'price': 35000,
+        'commands': '/store lion',
+        'features': (
+            'Quick Join\'ga ruxsat\n'
+            'Jamoa nomini ko‘rsatish\n'
+            'Emote buyruqlariga ruxsat\n'
+            'Discord\'da maxsus rol'
+        ),
+    },
+    {
+        'slug': 'duels-hero',
+        'name': '🛡️ Hero',
+        'price': 55000,
+        'commands': '/store hero',
+        'features': (
+            'Quick Join\'ga ruxsat\n'
+            'Jamoa nomini ko‘rsatish\n'
+            'Emote buyruqlariga ruxsat\n'
+            'Discord\'da maxsus rol\n'
+            'Shaxsiy arenaga ruxsat\n'
+            'Party duellarga ruxsat\n'
+            'Bezakli (trim) zirhlarga ruxsat'
+        ),
+    },
+    {
+        'slug': 'duels-legend',
+        'name': '⭐ Legend',
+        'price': 75000,
+        'commands': '/store legend',
+        'features': (
+            'Quick Join\'ga ruxsat\n'
+            'Jamoa nomini ko‘rsatish\n'
+            'Emote buyruqlariga ruxsat\n'
+            'Discord\'da maxsus rol\n'
+            'Shaxsiy arenaga ruxsat\n'
+            'Party duellarga ruxsat\n'
+            'Bezakli (trim) zirhlarga ruxsat\n'
+            'Lobbida uchishga ruxsat'
+        ),
+    },
+    {
+        'slug': 'duels-master',
+        'name': '⚡ Master',
+        'price': 99000,
+        'commands': '/store master',
+        'features': (
+            'Quick Join\'ga ruxsat\n'
+            'Jamoa nomini ko‘rsatish\n'
+            'Emote buyruqlariga ruxsat\n'
+            'Discord\'da maxsus rol\n'
+            'Jamoa yaratishga ruxsat\n'
+            'Party duellarga ruxsat\n'
+            'Bezakli (trim) zirhlarga ruxsat\n'
+            'Lobbida uchishga ruxsat'
+        ),
+    },
+]
+
+print("\n--- Duels Donator Ranklar ---")
+for r in duels_ranks:
+    obj, created = Product.objects.update_or_create(
+        slug=r['slug'],
+        defaults={
+            'name': r['name'], 'category': duels_donator,
             'price': r['price'], 'commands': r['commands'],
             'features': r['features'], 'is_active': True,
         }
@@ -490,7 +339,7 @@ boshqa_products = [
     },
 ]
 
-for server in [anarxiya2, anarxiya1, boxpvp]:
+for server in [anarxiya1, smp, duels]:
     s = server.slug
     print(f"\n--- {server.name} Ma'muriyat va Boshqa ---")
 
