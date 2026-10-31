@@ -5,6 +5,7 @@ from . import api_views
 urlpatterns = [
     # Pages
     path('', views.index, name='home'),
+    path('3d/', views.home3d, name='home3d'),
     path('qoidalar/', views.qoidalar, name='qoidalar'),
     path('qanday/', views.qanday, name='qanday'),
     path('qollab-quvvatlash/', views.qollab_quvvatlash, name='support'),

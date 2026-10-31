@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#04070a">
+<title>NovaMc.uz — O'zbekistonning 3D Minecraft serveri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. RANGLAR VA O'LCHAMLAR (shu yerdan o'zgartiring) ===== */
+:root{
+  --ac:#00ff87;            /* aktiv rang — skroll bilan 3D sahna rangiga qarab o'zgaradi */
+  --bg:#04070a;
+  --tx:#effdf5;
+  --mut:#8fb8a4;
+  --f1:'Orbitron',sans-serif;   /* sarlavhalar */
+  --f2:'Outfit',sans-serif;     /* matn */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font:300 17px/1.6 var(--f2);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+main,header,footer{position:relative;z-index:2}
+section{min-height:100vh;display:flex;align-items:center;padding:110px 6vw 70px}
+.wrap{width:100%;max-width:1200px;margin:0 auto}
+h1,h2,h3{font-family:var(--f1);line-height:1.1}
+h1{font-size:clamp(44px,9vw,120px);font-weight:900;letter-spacing:-.02em;
+   background:linear-gradient(100deg,var(--tx),var(--ac));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(28px,4.6vw,56px);margin-bottom:18px}
+p.lead{max-width:520px;color:var(--mut);font-size:19px;margin:22px 0 30px}
+
+/* ===== 2. TUGMALAR (magnit effekti .mag klassi bilan) ===== */
+.btn{display:inline-block;padding:14px 28px;border-radius:12px;font-weight:700;border:1px solid color-mix(in srgb,var(--ac) 55%,transparent);
+  background:color-mix(in srgb,var(--ac) 14%,transparent);color:var(--tx);cursor:pointer;font-family:var(--f2);font-size:16px;
+  backdrop-filter:blur(8px);transition:background .25s,box-shadow .25s}
+.btn:hover,.btn:focus-visible{background:var(--ac);color:#04110a;box-shadow:0 0 34px color-mix(in srgb,var(--ac) 60%,transparent);outline:none}
+.btn.solid{background:var(--ac);color:#04110a}
+.mag{display:inline-block}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+
+/* ===== 3. SHISHA (glassmorphism) KARTOCHKALAR + 3D TILT ===== */
+.glass{position:relative;border-radius:20px;padding:28px;overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  border:1px solid color-mix(in srgb,var(--ac) 28%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 24px 60px rgba(0,0,0,.5);transform-style:preserve-3d}
+.glass::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--ac) 38%,transparent),transparent 55%)}
+.glass:hover::after{opacity:1}
+.grid{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:30px}
+.glass h3{font-size:22px;margin-bottom:10px}
+.glass p{color:var(--mut);font-size:16px}
+.price{font-family:var(--f1);font-size:30px;color:var(--ac);margin:6px 0 14px}
+.price small{font-size:14px;color:var(--mut)}
+.glass ul{list-style:none;margin-bottom:20px;color:var(--mut);font-size:15px}
+.glass li{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.stats{display:flex;gap:46px;flex-wrap:wrap;margin-top:34px}
+.stats b{display:block;font-family:var(--f1);font-size:44px;color:var(--ac)}
+.stats span{color:var(--mut);font-size:15px}
+#about .wrap>*{max-width:640px;margin-left:auto}
+#about .grid{max-width:none}
+#about .glass{padding:22px}
+.ip{font-family:var(--f1);font-size:clamp(26px,5vw,52px);margin:10px 0 24px;color:var(--ac)}
+
+/* ===== 4. NAVIGATSIYA ===== */
+header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 6vw;
+  background:linear-gradient(var(--bg),transparent)}
+.logo{font-family:var(--f1);font-weight:900;font-size:22px}
+.logo span{color:var(--ac)}
+nav{display:flex;gap:30px}
+nav a{color:var(--mut);transition:color .2s}
+nav a:hover{color:var(--ac)}
+footer{padding:30px 6vw;text-align:center;color:var(--mut);font-size:14px}
+
+/* ===== 5. PRELOADER ===== */
+#pre{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.cube{width:54px;height:54px;border:2px solid var(--ac);box-shadow:0 0 30px var(--ac),inset 0 0 20px var(--ac);animation:spin 1.6s linear infinite}
+@keyframes spin{from{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(.7)}to{transform:rotate(360deg) scale(1)}}
+.pct{font-family:var(--f1);font-size:42px}
+#pre small{color:var(--mut)}
+
+/* ===== 6. MAXSUS KURSOR (faqat sichqoncha bor qurilmada) ===== */
+#cur,#ring{position:fixed;left:0;top:0;pointer-events:none;z-index:9999;display:none;border-radius:50%}
+#cur{width:8px;height:8px;margin:-4px;background:var(--ac)}
+#ring{width:38px;height:38px;margin:-19px;border:1.5px solid var(--ac);transition:width .25s,height .25s,margin .25s,background .25s}
+#ring.h{width:66px;height:66px;margin:-33px;background:color-mix(in srgb,var(--ac) 18%,transparent)}
+@media (hover:hover) and (pointer:fine){body,a,button{cursor:none}#cur,#ring{display:block}}
+
+/* ===== 7. MOSLASHUVCHANLIK ===== */
+@media (max-width:760px){
+  nav{display:none}
+  body{font-size:16px}
+  section{padding:100px 6vw 60px;align-items:flex-end}
+  #about .wrap>*{margin-left:0}
+  .stats{gap:28px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cube{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="pre"><div class="cube"></div><div class="pct"><b id="pn">0</b>%</div><small>NovaMc yuklanmoqda</small></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="cur"></div><div id="ring"></div>
+
+<header>
+  <a href="#home" class="logo mag">Nova<span>Mc</span></a>
+  <nav><a href="#about">Biz haqimizda</a><a href="#shop">Donat</a><a href="#contact">Aloqa</a></nav>
+  <button class="btn mag" data-copy>IP nusxalash</button>
+</header>
+
+<main id="page">
+  <!-- BOSH SAHIFA -->
+  <section id="home"><div class="wrap">
+    <h1 data-h>NovaMc.uz</h1>
+    <p class="lead" data-h>O'zbekistondagi eng zamonaviy Minecraft serveri. Kiring, o'z imperiyangizni quring.</p>
+    <div class="row" data-h>
+      <a class="btn solid mag" href="#shop">Donat sotib olish</a>
+      <button class="btn mag" data-copy>IP nusxalash</button>
+    </div>
+  </div></section>
+
+  <!-- BIZ HAQIMIZDA -->
+  <section id="about"><div class="wrap">
+    <h2 data-r>Server haqida</h2>
+    <p class="lead" data-r style="margin-top:0">Versiya 1.16.5 – 1.20+. Barqaror o'yin, adolatli qoidalar va har bir o'yinchi uchun mos imtiyozlar.</p>
+    <div class="stats" data-r>
+      <div><b data-n="9">0</b><span>donat darajasi</span></div>
+      <div><b data-n="20">0</b><span>maksimal home soni</span></div>
+      <div><b data-n="0">0</b><span>soniya teleport (General dan)</span></div>
+    </div>
+  </div></section>
+
+  <!-- XIZMATLAR (DONAT) -->
+  <section id="shop"><div class="wrap">
+    <h2 data-r>Donat darajalari</h2>
+    <p class="lead" data-r style="margin:0">Darajani tanlang, nikingizni kiriting, chekni yuboring.</p>
+    <div class="grid" id="ranks"></div>
+  </div></section>
+
+  <!-- ALOQA -->
+  <section id="contact"><div class="wrap" style="text-align:center">
+    <h2 data-r>Bizga qo'shiling</h2>
+    <div class="ip" data-r id="ipText"></div>
+    <div class="row" data-r style="justify-content:center">
+      <button class="btn solid mag" data-copy>IP nusxalash</button>
+      <a class="btn mag" id="tg" target="_blank" rel="noopener">Telegram</a>
+      <a class="btn mag" id="dc" target="_blank" rel="noopener">Discord</a>
+    </div>
+  </div></section>
+</main>
+<footer>© NovaMc.uz</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+/* ===== 8. SOZLAMALAR: matn, havola, rang, 3D obyekt ===== */
+const C = {
+  ip: 'novamc.uz',
+  tg: 'https://t.me/NovaMc_org',
+  dc: 'https://discord.gg/yswhhQKdB',
+  shop: 'https://novamc.uz/#shop-section',
+  // Bo'limlar bo'yicha 3D rang: Bosh sahifa → Haqida → Donat → Aloqa
+  colors: [0x00ff87, 0x00e5ff, 0xa855f7, 0xffbe0b],
+  cubes: { desktop: 70, mobile: 24 },    // aylanuvchi kichik bloklar soni
+  stars: { desktop: 1800, mobile: 450 }, // zarrachalar soni
+  // [nomi, narxi (so'm), home soni, teleport soniyasi]
+  ranks: [['Askar',6000,4,6],['Ritsar',16000,6,5],['Titan',29000,10,4],['Afsona',48000,15,3],['Imperator',86000,20,0]]
+};
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const touch = matchMedia('(hover:none)').matches;
+const mobile = innerWidth < 768 || touch;
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const hasG = !!window.gsap, hasGL = !!window.THREE;
+if (hasG) gsap.registerPlugin(ScrollTrigger);
+
+/* ===== 9. KONTENTNI JOYLASH ===== */
+$('#ipText').textContent = C.ip;
+$('#tg').href = C.tg; $('#dc').href = C.dc;
+$('#ranks').innerHTML = C.ranks.map(([n,p,h,t]) => `
+  <div class="card"><div class="glass tilt">
+    <h3>${n}</h3>
+    <div class="price">${p.toLocaleString('ru-RU')} <small>so'm</small></div>
+    <ul><li>Homelar: ${h}</li><li>Teleport: ${t} soniya</li><li>/kit ${n.toLowerCase()}</li></ul>
+    <a class="btn mag" href="${C.shop}" target="_blank" rel="noopener">Sotib olish</a>
+  </div></div>`).join('');
+
+$$('[data-copy]').forEach(b => { const t = b.textContent;
+  b.onclick = async () => {
+    try { await navigator.clipboard.writeText(C.ip); b.textContent = 'Nusxalandi: ' + C.ip; }
+    catch (e) { b.textContent = 'IP: ' + C.ip; }
+    setTimeout(() => b.textContent = t, 1800);
+  }; });
+
+/* ===== 10. THREE.JS SAHNA ===== */
+// S — skroll bilan GSAP o'zgartiradigan holat: x,y — joylashuv; sc — masshtab; ry — burilish; ang — kamera burchagi; hue — rang indeksi
+const S = { x: 0, y: 0, sc: 1, ry: 0, ang: 0, hue: 0 };
+const intro = { v: reduce ? 1 : 0 };
+const side = mobile ? 0 : 2.7, up = mobile ? 1.9 : 0;
+// Har bir bo'lim uchun 3D holat (Bosh sahifa, Haqida, Donat, Aloqa)
+const L = [
+  { x: side,  y: up,  sc: 1,   ry: 0,   ang: 0,    hue: 0 },
+  { x: -side, y: up,  sc: .9,  ry: 3.1, ang: .35,  hue: 1 },
+  { x: 0,     y: 0,   sc: .55, ry: 6.3, ang: -.35, hue: 2 },
+  { x: 0,     y: mobile ? 2 : .4, sc: 1.5, ry: 9.4, ang: 0, hue: 3 }
+];
+Object.assign(S, L[0]);
+
+if (hasGL) {
+  const R = new THREE.WebGLRenderer({ canvas: $('#gl'), antialias: !mobile, alpha: true, powerPreference: 'high-performance' });
+  let pr = Math.min(devicePixelRatio, mobile ? 1 : 1.75);
+  const sc = new THREE.Scene(); sc.fog = new THREE.FogExp2(0x04070a, .035);
+  const cam = new THREE.PerspectiveCamera(55, 1, .1, 100);
+  const pal = C.colors.map(c => new THREE.Color(c)), col = pal[0].clone();
+
+  sc.add(new THREE.AmbientLight(0xffffff, .4));
+  const pl = new THREE.PointLight(col, 2.4, 40); pl.position.set(4, 4, 6); sc.add(pl);
+  const pl2 = new THREE.PointLight(0xffffff, .6, 40); pl2.position.set(-6, -3, 4); sc.add(pl2);
+
+  // Piksel-art tekstura (Minecraft bloki ko'rinishi)
+  const tc = document.createElement('canvas'); tc.width = tc.height = 16;
+  const cx = tc.getContext('2d');
+  for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) { const v = 130 + Math.random() * 125 | 0; cx.fillStyle = `rgb(${v},${v},${v})`; cx.fillRect(i, j, 1, 1); }
+  cx.strokeStyle = 'rgba(0,0,0,.55)'; cx.strokeRect(.5, .5, 15, 15);
+  const tex = new THREE.CanvasTexture(tc); tex.magFilter = tex.minFilter = THREE.NearestFilter;
+
+  const mat = new THREE.MeshStandardMaterial({ map: tex, color: col, emissive: col, emissiveIntensity: .35, roughness: .5, metalness: .3 });
+  const g = new THREE.Group(); sc.add(g);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.4, 2.4), mat));               // asosiy blok
+  const shell = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.6, 3.6),               // tashqi sim ramka
+    new THREE.MeshBasicMaterial({ color: col, wireframe: true, transparent: true, opacity: .25 })); g.add(shell);
+
+  // Aylanuvchi mayda bloklar
+  const N = mobile ? C.cubes.mobile : C.cubes.desktop;
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(.2, .2, .2), mat, N); im.frustumCulled = false; g.add(im);
+  const orb = Array.from({ length: N }, () => ({ r: 3 + Math.random() * 3.5, a: Math.random() * 6.28,
+    s: (.15 + Math.random() * .4) * (Math.random() < .5 ? -1 : 1), y: (Math.random() - .5) * 5, z: .5 + Math.random() * 1.4 }));
+  const dm = new THREE.Object3D();
+
+  // Zarrachalar
+  const M = mobile ? C.stars.mobile : C.stars.desktop, pa = new Float32Array(M * 3);
+  for (let i = 0; i < pa.length; i++) pa[i] = (Math.random() - .5) * 40;
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pa, 3));
+  const pm = new THREE.PointsMaterial({ color: col, size: .06, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false });
+  const pts = new THREE.Points(pg, pm); sc.add(pts);
+
+  const resize = () => {
+    R.setPixelRatio(pr); R.setSize(innerWidth, innerHeight, false);
+    cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix();
+  };
+  addEventListener('resize', resize); resize();
+
+  const m = { x: 0, y: 0, tx: 0, ty: 0 };           // sichqoncha parallaksi
+  addEventListener('pointermove', e => { m.tx = e.clientX / innerWidth * 2 - 1; m.ty = e.clientY / innerHeight * 2 - 1; });
+
+  const clk = new THREE.Clock(); let T = 0, lastHue = -1, fr = 0, t0 = performance.now(), tuned = 0;
+  (function tick() {
+    requestAnimationFrame(tick);
+    const dt = Math.min(clk.getDelta(), .05) * (reduce ? 0 : 1); T += dt;
+    m.x += (m.tx - m.x) * .06; m.y += (m.ty - m.y) * .06;
+
+    // Rang: skroll bo'yicha ikki rang orasida silliq o'tish
+    const i = Math.min(Math.floor(S.hue), pal.length - 2);
+    col.copy(pal[i]).lerp(pal[i + 1], S.hue - i);
+    mat.color.copy(col); mat.emissive.copy(col); shell.material.color.copy(col); pm.color.copy(col); pl.color.copy(col);
+    if (Math.abs(S.hue - lastHue) > .003) { lastHue = S.hue; document.documentElement.style.setProperty('--ac', '#' + col.getHexString()); }
+
+    // Obyekt joyi, masshtabi, burilishi
+    g.position.set(S.x + m.x * .3, S.y - m.y * .3, 0);
+    g.scale.setScalar(Math.max(S.sc * intro.v, .0001));
+    g.rotation.y = S.ry + T * .25 + m.x * .5; g.rotation.x = .3 + m.y * .35;
+    shell.rotation.y = -T * .5;
+
+    // Kamera burchagi (skroll bilan)
+    const rad = cam.aspect < 1 ? 13 : 9;
+    cam.position.set(Math.sin(S.ang) * rad + m.x * .4, S.ang * 2 - m.y * .3, Math.cos(S.ang) * rad); cam.lookAt(0, 0, 0);
+
+    for (let k = 0; k < N; k++) { const o = orb[k]; o.a += o.s * dt;
+      dm.position.set(Math.cos(o.a) * o.r, o.y + Math.sin(o.a * 2) * .3, Math.sin(o.a) * o.r);
+      dm.rotation.set(o.a, o.a * .7, 0); dm.scale.setScalar(o.z); dm.updateMatrix(); im.setMatrixAt(k, dm.matrix); }
+    im.instanceMatrix.needsUpdate = true;
+    pts.rotation.y = T * .02 + S.ry * .05; pts.position.x = m.x * .8;
+    R.render(sc, cam);
+
+    // Avto-sifat: FPS 45 dan past bo'lsa piksel zichligini kamaytirish
+    fr++; const now = performance.now();
+    if (now - t0 > 2500) { if (fr / 2.5 < 45 && pr > 1 && tuned++ < 2) { pr = 1; resize(); } t0 = now; fr = 0; }
+  })();
+}
+
+/* ===== 11. ANIMATSIYALAR (GSAP) ===== */
+function setupAnim() {
+  if (!hasG) return;
+  if (!reduce) {
+    // Skroll bilan 3D obyekt: kamera burchagi, masshtab, rang, joylashuv
+    $$('main section').forEach((el, i) => { if (!i) return;
+      gsap.fromTo(S, { ...L[i - 1] }, { ...L[i], ease: 'none', immediateRender: false,
+        scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 25%', scrub: 1 } }); });
+
+    // Bo'limdan chiqishda silliq so'nish
+    $$('main section .wrap').forEach(w => gsap.to(w, { opacity: 0, y: -70, ease: 'none',
+      scrollTrigger: { trigger: w, start: 'bottom 45%', end: 'bottom 5%', scrub: true } }));
+
+    // Paydo bo'lish: slide + 3D egilish
+    $$('[data-r]').forEach(el => gsap.from(el, { y: 70, opacity: 0, rotationX: -20, transformPerspective: 900,
+      transformOrigin: '50% 100%', duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' } }));
+    // Kartochkalar: 3D flip
+    $$('.card').forEach((el, i) => gsap.from(el, { rotationY: 90, opacity: 0, transformPerspective: 900, duration: 1.1,
+      delay: (i % 3) * .1, ease: 'back.out(1.4)', scrollTrigger: { trigger: el, start: 'top 92%' } }));
+  }
+  // Raqamlar sanog'i
+  $$('[data-n]').forEach(el => { const o = { v: 0 }, n = +el.dataset.n;
+    if (reduce) { el.textContent = n; return; }
+    gsap.to(o, { v: n, duration: 1.6, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+      onUpdate: () => el.textContent = Math.round(o.v) }); });
+}
+
+function start() {
+  setupAnim();
+  if (!hasG || reduce) { intro.v = 1; return; }
+  gsap.to(intro, { v: 1, duration: 1.8, ease: 'elastic.out(1,.6)' });
+  gsap.from('[data-h]', { y: 60, opacity: 0, stagger: .12, duration: 1, ease: 'power3.out', delay: .35 });
+}
+
+/* ===== 12. PRELOADER ===== */
+let started = false, loaded = document.readyState === 'complete';
+addEventListener('load', () => loaded = true);
+const pre = $('#pre'), pn = $('#pn');
+function done() {
+  if (started) return; started = true;
+  if (!hasG) { pre.remove(); start(); return; }
+  gsap.to(pre, { yPercent: -100, duration: reduce ? 0 : .9, ease: 'power4.inOut', onComplete: () => pre.remove() });
+  start();
+}
+if (hasG) {
+  const p = { v: 0 };
+  gsap.to(p, { v: 100, duration: reduce ? .2 : 1.8, ease: 'power2.inOut', onUpdate: () => pn.textContent = Math.round(p.v),
+    onComplete: () => loaded ? done() : addEventListener('load', done) });
+} else done();
+setTimeout(done, 6000);   // zaxira: CDN sekin bo'lsa ham sayt ochiladi
+
+/* ===== 13. KURSOR, 3D TILT, MAGNIT ===== */
+if (hasG && !touch) {
+  const ring = $('#ring'), dot = $('#cur');
+  const qx = gsap.quickTo(ring, 'x', { duration: .35, ease: 'power3' }), qy = gsap.quickTo(ring, 'y', { duration: .35, ease: 'power3' });
+  addEventListener('pointermove', e => { dot.style.transform = `translate(${e.clientX}px,${e.clientY}px)`; qx(e.clientX); qy(e.clientY); });
+  document.addEventListener('pointerover', e => ring.classList.toggle('h', !!e.target.closest('a,button,.tilt')));
+
+  $$('.tilt').forEach(el => {
+    el.addEventListener('pointermove', e => { const r = el.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      el.style.setProperty('--mx', px * 100 + '%'); el.style.setProperty('--my', py * 100 + '%');
+      gsap.to(el, { rotationY: (px - .5) * 16, rotationX: (.5 - py) * 16, transformPerspective: 800, duration: .4, ease: 'power2.out', overwrite: 'auto' }); });
+    el.addEventListener('pointerleave', () => gsap.to(el, { rotationX: 0, rotationY: 0, duration: .7, ease: 'elastic.out(1,.5)' }));
+  });
+
+  $$('.mag').forEach(el => {
+    const mx = gsap.quickTo(el, 'x', { duration: .5, ease: 'elastic.out(1,.4)' }), my = gsap.quickTo(el, 'y', { duration: .5, ease: 'elastic.out(1,.4)' });
+    el.addEventListener('pointermove', e => { const r = el.getBoundingClientRect(); mx((e.clientX - r.left - r.width / 2) * .35); my((e.clientY - r.top - r.height / 2) * .5); });
+    el.addEventListener('pointerleave', () => { mx(0); my(0); });
+  });
+}
+})();
+</script>
+</body>
+</html>

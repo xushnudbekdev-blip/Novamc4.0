@@ -9,19 +9,36 @@ from .serializers import ProductSerializer
 def index(request):
     """Bosh sahifa. Tovarlar ro'yxati DRF serializer orqali JSON sifatida
     shablonga uzatiladi va JS tomonidan xarid formasida ishlatiladi."""
-    products = Product.objects.filter(is_active=True).select_related('category__server').order_by(
-        'category__server__order', 'category__order', '-price'
-    )
-    products_data = ProductSerializer(products, many=True).data
+    # Faqat Anarxiya serveri mahsulotlari ko'rsatiladi
+    anarxiya_server = ServerMode.objects.filter(is_active=True, slug='anarxiya1').first()
 
-    servers = ServerMode.objects.filter(is_active=True).order_by('order')
-    servers_json = [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in servers]
+    if anarxiya_server:
+        products = Product.objects.filter(
+            is_active=True,
+            category__server=anarxiya_server
+        ).select_related('category__server').order_by('category__order', '-price')
+        servers_json = [{'id': anarxiya_server.id, 'name': anarxiya_server.name, 'slug': anarxiya_server.slug}]
+    else:
+        # Agar slug topilmasa, barcha serverlarni ko'rsatish (zaxira)
+        products = Product.objects.filter(is_active=True).select_related('category__server').order_by(
+            'category__server__order', 'category__order', '-price'
+        )
+        servers = ServerMode.objects.filter(is_active=True).order_by('order')
+        servers_json = [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in servers]
+
+    products_data = ProductSerializer(products, many=True).data
 
     return render(request, 'index.html', {
         'products_json': list(products_data),
         'servers_json': servers_json,
         'page': 'home',
     })
+
+
+
+def home3d(request):
+    """Yangi 3D (Three.js + GSAP) sahifa: bosh sahifa, haqida, donat, qoidalar, aloqa"""
+    return render(request, 'home3d.html', {'page': 'home3d'})
 
 
 def qoidalar(request):
